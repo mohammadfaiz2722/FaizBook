@@ -1,0 +1,21 @@
+/* src/components/SocialMediaPage.css */
+.social-media-page {
+    margin-top: 20px;
+  }
+  
+  .create-post {
+    margin-bottom: 20px;
+  }
+  
+  .posts .card {
+    margin-bottom: 20px;
+  }
+  
+  .comments .comment {
+    margin-top: 5px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
