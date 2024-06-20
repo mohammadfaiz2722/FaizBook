@@ -1,99 +1,310 @@
-// src/components/SocialMediaPage.js
 import React, { useState, useEffect } from 'react';
 import './SocialMediaPage.css';
-import post1 from './post1.jpeg'
-import post3 from './post3.jpeg'
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SocialMediaPage = () => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
-const navigate=useNavigate()
+  const [editingPost, setEditingPost] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [comments, setComments] = useState({});
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userId');
+  console.log(userId);
   useEffect(() => {
-    // Fetch posts from the API when the component mounts
     fetchPosts();
-    if(!localStorage.getItem('token'))
-      {
-        navigate("/")
-      }
+    if (!localStorage.getItem('token')) {
+      navigate('/');
+    }
   }, []);
-  
+
   const fetchPosts = async () => {
-    // Replace with API call to fetch posts
-    const fetchedPosts = [
-      { id: 1, content: 'This is a sample post!', image: post1, likes: 5, liked: false, comments: ['Great post!', 'Nice!'] },
-      { id: 2, content: 'Hello world!', image: post3, likes: 3, liked: false, comments: [] },
-    ];
-    setPosts(fetchedPosts);
+    try {
+      const response = await fetch('http://localhost:5000/api/posts', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setPosts(data);
+      } else {
+        toast.error('Failed to fetch posts');
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast.error('Failed to fetch posts');
+    }
   };
-  // window.location.reload()
 
   const handleCreatePost = async () => {
-    // Replace with API call to create a new post
-    const newPostObject = { id: Date.now(), content: newPost, image: post1, likes: 0, liked: false, comments: [] };
-    setPosts([newPostObject, ...posts]);
-    setNewPost('');
+    if (!newPost.trim()) return;
+
+    try {
+      const response = await fetch('http://localhost:5000/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+         'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ content: newPost })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setPosts([data, ...posts]);
+        setNewPost('');
+        toast.success('Post created successfully');
+      } else {
+        toast.error('Failed to create post');
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error('Failed to create post');
+    }
   };
 
-  const handleLikePost = (id) => {
-    // Replace with API call to like/unlike a post
-    const updatedPosts = posts.map(post => 
-      post.id === id ? { ...post, likes: post.liked ? post.likes - 1 : post.likes + 1, liked: !post.liked } : post
-    );
-    setPosts(updatedPosts);
+ 
+
+  const handleUnlikePost = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/unlike/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+         'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const updatedPosts = posts.map(post =>
+          post._id === id ? { ...post, likes: post.likes - 1, liked: false } : post
+        );
+        setPosts(updatedPosts);
+      } else {
+        toast.error('Failed to unlike post');
+      }
+    } catch (error) {
+      console.error('Error unliking post:', error);
+      toast.error('Failed to unlike post');
+    }
   };
 
-  const handleAddComment = (id, comment) => {
-    // Replace with API call to add a comment
-    const updatedPosts = posts.map(post => 
-      post.id === id ? { ...post, comments: [...post.comments, comment] } : post
-    );
-    setPosts(updatedPosts);
+  const handleDeletePost = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        setPosts(posts.filter(post => post._id !== id));
+        toast.success('Post deleted successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.msg || 'Failed to delete post');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
+    }
+  };
+  const handleEditClick = (post) => {
+    setEditingPost(post._id);
+    setEditContent(post.content);
   };
 
+  const handleUpdatePost = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ content: editContent })
+      });
+
+      if (response.ok) {
+        const updatedPost = await response.json();
+        setPosts(posts.map(post => post._id === id ? updatedPost : post));
+        setEditingPost(null);
+        toast.success('Post updated successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.msg || 'Failed to update post');
+      }
+    } catch (error) {
+      console.error('Error updating post:', error);
+      toast.error('Failed to update post');
+    }
+  };
+  const handleToggleLike = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/togglelike/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        const { likes, likeCount } = await response.json();
+        setPosts(posts.map(post => 
+          post._id === id ? { ...post, likes, likeCount } : post
+        ));
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.msg || 'Failed to update like');
+      }
+    } catch (error) {
+      console.error('Error updating like:', error);
+      toast.error('Failed to update like');
+    }
+  };
+  const handleAddComment = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/comment/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ text: comments[postId] })
+      });
+
+      if (response.ok) {
+        const updatedComments = await response.json();
+        setPosts(posts.map(post => 
+          post._id === postId ? { ...post, comments: updatedComments } : post
+        ));
+        setComments({ ...comments, [postId]: '' });
+        toast.success('Comment added successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.msg || 'Failed to add comment');
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast.error('Failed to add comment');
+    }
+  };
+
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/comment/${postId}/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        const updatedComments = await response.json();
+        setPosts(posts.map(post => 
+          post._id === postId ? { ...post, comments: updatedComments } : post
+        ));
+        toast.success('Comment deleted successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.msg || 'Failed to delete comment');
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast.error('Failed to delete comment');
+    }
+  };
   return (
     <div className="social-media-page container">
-      <div className="create-post">
-        <textarea 
-          className="form-control" 
-          rows="3" 
-          placeholder="What's on your mind?" 
-          value={newPost} 
-          onChange={(e) => setNewPost(e.target.value)} 
-        />
-        <button className="btn btn-primary mt-2" onClick={handleCreatePost}>Post</button>
-      </div>
-      <div className="posts mt-4">
-        {posts.map(post => (
-          <div key={post.id} className="card mb-3">
-            <img src={post.image} className="card-img-top" alt="Post" width={200} height={400}/>
-            <div className="card-body">
-              <p className="card-text">{post.content}</p>
-              <button className="btn btn-light" onClick={() => handleLikePost(post.id)}>
-                {post.liked ? 'Unlike' : 'Like'} ({post.likes})
-              </button>
-              <div className="comments mt-3">
-                {post.comments.map((comment, index) => (
-                  <div key={index} className="comment">{comment}</div>
-                ))}
+    <ToastContainer />
+    <div className="create-post">
+      <textarea
+        className="form-control"
+        rows="3"
+        placeholder="What's on your mind?"
+        value={newPost}
+        onChange={(e) => setNewPost(e.target.value)}
+      />
+      <button className="btn btn-primary mt-2" onClick={handleCreatePost}>Post</button>
+    </div>
+    <div className="posts mt-4">
+      {posts.map(post => (
+        <div key={post._id} className="card mb-3">
+          <div className="card-body">
+            {editingPost === post._id ? (
+              <>
+                <textarea
+                  className="form-control mb-2"
+                  rows="3"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                />
+                <button className="btn btn-success me-2" onClick={() => handleUpdatePost(post._id)}>
+                  Save
+                </button>
+                <button className="btn btn-secondary" onClick={() => setEditingPost(null)}>
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="card-text">{post.content}</p>
+                <button 
+                  className={`btn ${post.likes.includes(userId) ? 'btn-primary' : 'btn-light'} me-2`} 
+                  onClick={() => handleToggleLike(post._id)}
+                >
+                  {post.likes.includes(userId) ? 'Unlike' : 'Like'} ({post.likes.length})
+                </button>
+                <button className="btn btn-info me-2" onClick={() => handleEditClick(post)}>
+                  Edit
+                </button>
+                <button className="btn btn-danger" onClick={() => handleDeletePost(post._id)}>
+                  Delete
+                </button>
+              </>
+            )}
+            <div className="comments mt-3">
+              <h6>Comments:</h6>
+              {post.comments.map(comment => (
+                <div key={comment._id} className="comment mb-2">
+                  <p>{comment.text}</p>
+                  {comment.user === userId && (
+                    <button 
+                      className="btn btn-sm btn-danger" 
+                      onClick={() => handleDeleteComment(post._id, comment._id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              ))}
+              <div className="add-comment">
                 <input 
                   type="text" 
-                  className="form-control mt-2" 
-                  placeholder="Add a comment..." 
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleAddComment(post.id, e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
+                  className="form-control"
+                  placeholder="Add a comment..."
+                  value={comments[post._id] || ''}
+                  onChange={(e) => setComments({...comments, [post._id]: e.target.value})}
                 />
+                <button 
+                  className="btn btn-primary mt-2" 
+                  onClick={() => handleAddComment(post._id)}
+                >
+                  Add Comment
+                </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
 };
 
 export default SocialMediaPage;
