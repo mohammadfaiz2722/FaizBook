@@ -2,10 +2,15 @@ const connectToMongo = require('./db');
 const express = require('express');
 const cors = require('cors');
 
+const bodyParser = require('body-parser');
+
 connectToMongo(); // Connect to MongoDB database
 
+require('dotenv').config();
 const app = express();
 const port = 5000;
+app.use(bodyParser.json());
+
 
 app.use(cors()); // Enable CORS
 

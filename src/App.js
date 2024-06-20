@@ -9,6 +9,9 @@ import SocialMediaPage from './components/SocialMediaPage';
 import './App.css';
 import Alert from './components/Alert';
 import { useState } from 'react'
+import ResetPassword from './components/ResertPassword';
+import VerifyOTP from './components/VerifyOTP';
+import HomePage from './components/Home';
 
 function App() {
   const [alert,setAlert]=useState(null)
@@ -34,7 +37,9 @@ const showAlert=((message,type)=>
             <Route path="/signup" element={<Signup showAlert={showAlert}/>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/social-media" element={<SocialMediaPage />} />
-            <Route path="/" element={<Login />} />
+            <Route path="/verifyotp" element={<VerifyOTP />} />
+            <Route path="/resetpassword" element={<ResetPassword />} />
+            <Route path="/" element={<HomePage />} />
           </Routes>
         </div>
       </div>

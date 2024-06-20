@@ -1,9 +1,15 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const Signup = (props) => {
+  useEffect(()=>{
+    if(localStorage.getItem('token'))
+      {
+        navigate("/social-media")
+      }
+  },[])
   const navigate=useNavigate();
   const [credentials,setCredentials]=useState({name:"",email:"",password:"",cpassword:""})
   const onChange=(e)=>

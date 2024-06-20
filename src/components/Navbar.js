@@ -1,8 +1,9 @@
 // src/components/Navbar.js
 import React from 'react';
 import './Navbar.css'; // Import custom CSS for the Navbar
-import { Link } from 'react-router-dom';
+import { Link,  useNavigate } from 'react-router-dom';
 const Navbar = () => {
+  const navigate=useNavigate()
   return (
     <nav className="navbar navbar-expand-lg custom-navbar">
       <div className="container-fluid">
@@ -16,10 +17,11 @@ const Navbar = () => {
               <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/login">Login</Link>
+            {!localStorage.getItem('token')&& <Link className="nav-link" to="/login">Login</Link>}
+              {localStorage.getItem('token')&& <button className="nav-link" onClick={()=>{localStorage.clear(); window.location.reload() }}>Logout</button>}
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/signup">Register</Link>
+            {!localStorage.getItem('token')&& <Link className="nav-link" to="/signup">Register</Link>}
             </li>
           </ul>
         </div>

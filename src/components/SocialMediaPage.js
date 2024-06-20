@@ -3,15 +3,21 @@ import React, { useState, useEffect } from 'react';
 import './SocialMediaPage.css';
 import post1 from './post1.jpeg'
 import post3 from './post3.jpeg'
+import { useNavigate } from 'react-router-dom';
+
 const SocialMediaPage = () => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
-
+const navigate=useNavigate()
   useEffect(() => {
     // Fetch posts from the API when the component mounts
     fetchPosts();
+    if(!localStorage.getItem('token'))
+      {
+        navigate("/")
+      }
   }, []);
-
+  
   const fetchPosts = async () => {
     // Replace with API call to fetch posts
     const fetchedPosts = [
@@ -20,6 +26,7 @@ const SocialMediaPage = () => {
     ];
     setPosts(fetchedPosts);
   };
+  // window.location.reload()
 
   const handleCreatePost = async () => {
     // Replace with API call to create a new post

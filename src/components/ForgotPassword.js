@@ -1,18 +1,62 @@
-// src/components/ForgotPassword.js
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Auth.css';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  useEffect(()=>{
+    if(localStorage.getItem('token'))
+      {
+        navigate("/social-media")
+      }
+  },[])
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle forgot password logic
-  };
+    const response = await fetch(`http://localhost:5000/api/auth/forgotpassword`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const json = await response.json();
+    if (response.ok) {
+      localStorage.setItem('otpToken', json.otpToken);
+      localStorage.setItem('email', email);
+      toast.success('OTP sent to your email', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark"
+      });
+      setTimeout(() => {
+        navigate('/verifyotp');
+      }, 3000);
+    } else {
+      toast.error('Failed to send OTP', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark"
+      });
+    }
+  }
 
   return (
     <div className="auth-container">
+      <ToastContainer />
       <h2>Forgot Password</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
