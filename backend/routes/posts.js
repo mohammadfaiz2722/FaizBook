@@ -56,7 +56,7 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-// localStorage.setItem('userId',req.params.id)
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -67,7 +67,6 @@ router.get('/:id', auth, async (req, res) => {
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ msg: 'Post not found' });
     }
-
     res.status(500).send('Server Error');
   }
 });
