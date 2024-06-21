@@ -28,6 +28,7 @@ const showAlert=((message,type)=>
 })
   return (
     <Router>
+      
       <div className="App">
         <Navbar />
         <Alert alert={alert}/>

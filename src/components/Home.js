@@ -5,20 +5,18 @@ import { Link, useNavigate } from 'react-router-dom'; // Assuming you're using R
 import './Home.css'
 const HomePage = () => {
   const navigate=useNavigate()
-  useEffect(()=>{
-    if(localStorage.getItem('token'))
-      {
-        navigate("/social-media")
-      }
-  })
+
   return (
     <div className="home-container">
       <div className="home-content">
         <h1>Welcome to My Awesome App!</h1>
-        <p>Your gateway to amazing experiences.</p>
+        <p>Your gateway to amazing  experiences.</p>
+        
         <div className="cta-buttons">
-          <Link to="/login" className="btn btn-primary">Log In</Link>
-          <Link to="/signup" className="btn btn-secondary">Sign Up</Link>
+        {!localStorage.getItem('token') && <Link to="/login" className="btn btn-primary">Log In</Link>}
+        {!localStorage.getItem('token') &&<Link to="/signup" className="btn btn-secondary">Sign Up</Link>}
+        
+          {localStorage.getItem('token') && <Link to="/social-media" className="btn btn-primary">Social Media</Link> }
         </div>
       </div>
     </div>

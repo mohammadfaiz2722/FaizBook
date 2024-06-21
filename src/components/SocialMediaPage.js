@@ -12,7 +12,6 @@ const SocialMediaPage = () => {
   const [comments, setComments] = useState({});
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
-  console.log(userId);
   useEffect(() => {
     fetchPosts();
     if (!localStorage.getItem('token')) {
@@ -22,7 +21,7 @@ const SocialMediaPage = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -44,7 +43,7 @@ const SocialMediaPage = () => {
     if (!newPost.trim()) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +69,7 @@ const SocialMediaPage = () => {
 
   const handleUnlikePost = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/unlike/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/unlike/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +92,7 @@ const SocialMediaPage = () => {
 
   const handleDeletePost = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +118,7 @@ const SocialMediaPage = () => {
 
   const handleUpdatePost = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +143,7 @@ const SocialMediaPage = () => {
   };
   const handleToggleLike = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/togglelike/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/togglelike/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +167,7 @@ const SocialMediaPage = () => {
   };
   const handleAddComment = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/comment/${postId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/comment/${postId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +195,7 @@ const SocialMediaPage = () => {
 
   const handleDeleteComment = async (postId, commentId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/comment/${postId}/${commentId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/posts/comment/${postId}/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
